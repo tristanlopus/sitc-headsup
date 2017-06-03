@@ -1,0 +1,45 @@
+<html lang="en" >
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <base href="http://sitc-headsup.dev/">
+    <!-- Angular Material Stylesheet -->
+    <link rel="stylesheet" href="bower_components/angular-material/angular-material.min.css">
+    <!--AngularJS -->
+    <script src="bower_components/angular/angular.min.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.min.js"></script>
+    <script src="bower_components/angular-aria/angular-aria.min.js"></script>
+    <script src="bower_components/angular-messages/angular-messages.min.js"></script>
+    <!--Angular Material-->
+    <script src="bower_components/angular-material/angular-material.js"></script>
+    <!--Angular UI-->
+    <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+    <!--Material Icons Font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!--Roboto Font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+    <!--App Stylesheet-->
+    <link rel="stylesheet" href="app/stylesheets/headsUpAppStylesheet.css" />
+    <!--SITC Icons Font-->
+    <link rel="stylesheet" href="app/images/icons/sitcIconFont/style.css">
+    <!-- App Scripts -->
+    <script src="app/headsUpApp.js"></script>
+    <script src="app/controllers/headsUpAppController.js"></script>
+    <script src="app/controllers/headsUpStateController.js"></script>
+    <script src="app/controllers/childControllers/headsUpInfoController.js"></script>
+    <script src="app/controllers/childControllers/headsUpIdController.js"></script>
+    <script src="app/controllers/childControllers/headsUpConfirmController.js"></script>
+    <script src="app/services/serverInterfaces.js"></script>
+    <!-- Production Tools -->
+    <script src="tools/obj_dump.js"></script>
+
+  </head>
+
+  <body ng-app="headsUpApp" style="height:100%"><base href="/" />
+     <div ng-controller="HeadsUpAppController" ng-cloak style="height:100%">
+       <div id="mainView" ui-view layout="row" layout-align="center" style="height:100%"></div>
+     </div>
+
+
+
+  </body>
+</html>

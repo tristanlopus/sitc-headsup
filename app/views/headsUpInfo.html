@@ -1,0 +1,104 @@
+<md-card id="headsUpCard">
+  <md-card-title>
+    <md-toolbar layout="row">
+      <div class="md-toolbar-tools">
+        <h1>Heads Up for <strong>{{ person.firstName }} {{ person.lastName}}</strong></h1>
+      </div>
+      <span flex></span>
+      <md-button ng-click="backToId()">Back</md-button>
+    </md-toolbar>
+  </md-card-title>
+
+  <md-card-content>
+    <div id="basicInfoContainer" layout="column">
+      <div layout="row">
+        <md-input-container>
+          <label>Carpool Site</label>
+          <md-select ng-model="genInfo.carpoolSite" aria-label="Carpool Site" md-on-close="setDaysInfo('carpoolSite')">
+            <md-option ng-repeat="carpoolSite in carpoolSites" ng-value="carpoolSite.carpoolSite_id">{{ carpoolSite.name }}</md-option>
+          </md-select>
+        </md-input-container>
+        <span flex></span>
+      </div>
+      <div layout="row">
+        <md-input-container>
+          <label>Preferred Project</label>
+          <md-select ng-model="genInfo.preferredProject" aria-label="Preferred Project" md-on-close="setDaysInfo('preferredProject')">
+            <md-option ng-repeat="project in projects" ng-value="project.id">{{ project.name }}</md-option>
+          </md-select>
+        </md-input-container>
+      </div>
+      <div id="drivingDetails" style="margin-top: 10px" layout="column">
+        <div style="margin-bottom: 10px; padding-left:7px; font-size: 14px; font-weight: 500; opacity: .54">Driving</div>
+        <md-input-container style="margin-bottom:0">
+          <md-checkbox ng-model="genInfo.hasCar" aria-label="I can drive" ng-change="setDaysInfo('hasCar')">Can drive if needed</md-checkbox>
+        </md-input-container>
+        <md-input-container ng-show="genInfo.hasCar">
+          <label># of seatbelts</label>
+          <input type="number" ng-model="genInfo.numSeatbelts" style="width:104px" aria-label="Number of seatbelts in car" ng-change="setDaysInfo('numSeatbelts')"/>
+        </md-input-container>
+
+      </div>
+    </div>
+
+    <div id="weeksContainer" layout="column">
+      <div class="weekContainer" ng-repeat="week in weeks">
+        <md-toolbar>
+          <div class="md-toolbar-tools">
+            <span flex></span>
+            <h2>Week {{ $index + 1}}</h2>
+            <span flex></span>
+          </div>
+        </md-toolbar>
+        <table class="daysContainer">
+          <tr>
+            <td class="dayContainer" ng-repeat="day in week">
+              <div layout="row" layout-align="start center">
+                <div id="day_dateContainer" layout="column" style="padding-left: 5px">
+                  <span style="opacity: .54; font-weight: 700">{{ daysOfWeek[day.day]}}</span>
+                  <span flex="noshrink" class="md-subhead" style="font-weight:500">{{ months[day.month] }} {{ day.date }}</span>
+                </div>
+                <span flex></span>
+                <md-checkbox ng-model="day.isComing" style="margin-bottom:0" aria-label="Coming this day"></md-checkbox>
+                <span flex></span>
+              </div>
+              <div id="detailsContainer" ng-show="detailsAreShowing[$parent.$index]">
+                <md-input-container>
+                  <label>Carpool Site</label>
+                  <md-select ng-model="day.carpoolSite" aria-label="Carpool Site">
+                    <md-option ng-repeat="carpoolSite in carpoolSites" ng-value="carpoolSite.carpoolSite_id">{{ carpoolSite.name }}</md-option>
+                  </md-select>
+                </md-input-container>
+                <md-input-container>
+                  <label>Preferred Project</label>
+                  <md-select ng-model="day.preferredProject" aria-label="Preferred Project">
+                    <md-option ng-repeat="project in projects" ng-value="project.id">{{ project.name }}</md-option>
+                  </md-select>
+                </md-input-container>
+                <div id="drivingDetails" style="margin-top: 10px">
+                  <div style="margin-bottom: 10px; padding-left:7px; font-size: 14px; font-weight: 500; opacity: .54">Driving</div>
+                  <md-input-container style="margin-bottom:0">
+                    <md-checkbox ng-model="day.hasCar" aria-label="I can drive">Can drive if needed</md-checkbox>
+                  </md-input-container>
+                  <md-input-container ng-show="day.hasCar">
+                    <label># of seatbelts</label>
+                    <input type="number" ng-model="day.numSeatbelts" style="width:104px" aria-label="Number of seatbelts in car"/>
+                  </md-input-container>
+
+                </div>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <div layout="row">
+          <span flex></span>
+          <md-input-container>
+            <md-checkbox ng-model="detailsAreShowing[$index]" aria-label="Show details">Show Details</md-checkbox>
+          </md-input-container>
+        </div>
+      </div>
+    </div>
+
+    <md-button class="md-primary md-raised" ng-click="submit()">Submit</md-button>
+  </md-card-content>
+</md-card>

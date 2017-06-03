@@ -1,0 +1,38 @@
+#mainView {
+  background-image: url(/app/images/background2.jpg);
+  background-size: 100%; }
+
+#headsUpCard {
+  background-color: rgba(255, 255, 255, 0.94); }
+  #headsUpCard md-card-title {
+    padding: 0; }
+  #headsUpCard md-card-content {
+    padding-top: 16px; }
+
+.weekContainer {
+  margin-top: 10px; }
+  .weekContainer md-toolbar {
+    height: 35px !important;
+    min-height: 35px !important; }
+    .weekContainer md-toolbar div.md-toolbar-tools {
+      height: 35px; }
+
+.daysContainer {
+  width: 100%;
+  border-collapse: collapse; }
+
+.dayContainer {
+  height: 50px;
+  border: 1px solid rgba(0, 0, 0, 0.54);
+  padding: 5px; }
+
+#detailsContainer {
+  margin-top: 15px; }
+  #detailsContainer md-input-container {
+    margin-top: 5px; }
+
+.md-errors-spacer {
+  min-height: 0 !important;
+  height: 0; }
+
+/*# sourceMappingURL=headsUpAppStylesheet.css.map */

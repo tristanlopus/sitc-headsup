@@ -1,0 +1,41 @@
+<md-card id="headsUpCard">
+  <md-card-content>
+    <h2>Heads Up</h2>
+    <h4>Thank you for taking a moment to give us a heads up about when we can plan on seeing you!</h4>
+
+    <!-- <p>
+      As a thank you, we'll do our darndest to honor the project preference that you specify — and we will appreciate your flexibility on the days when we just can't make it happen.
+    </p> -->
+
+    <div>
+      <h4 style="margin-bottom:0">First let's find you in our database.</h4>
+      <span>Input the email that you used as your <strong>volunteer email</strong> (not your emergency contact's email) when you registered to volunteer.</span>
+    </div>
+    <div layout="column">
+      <div layout="row">
+        <md-input-container style="margin-bottom: 0">
+          <label>Email</label>
+          <input type="email" ng-model="emailForQuery" size="40" />
+        </md-input-container>
+        <span flex></span>
+      </div>
+      <div layout="row">
+        <md-button class="md-primary" ng-click="findPerson(emailForQuery)">Find me</md-button>
+        <span flex></span>
+      </div>
+    </div>
+    <div id="potentialPersonsContainer">
+      <md-list>
+        <md-list-item class="md-2-line" ng-repeat="person in potentialPersons" >
+          <div layout="row">
+            <div class="md-list-item-text">
+              <h3>{{ person.firstName }} {{ person.lastName }}</h3>
+              <h4 class="md-subhead" style="font-weight:500">{{ person.email }} | {{ person.phone | phoneNumber }}</h4>
+            </div>
+            <md-button class="md-primary" ng-click="selectPerson($index)">Select</md-button>
+          </div>
+        </md-list-item>
+      </md-list>
+    </div>
+  </md-card-content>
+</md-card>
