@@ -62,7 +62,7 @@
                 <md-checkbox ng-model="day.isComing" style="margin-bottom:0" aria-label="Coming this day"></md-checkbox>
                 <span flex></span>
               </div>
-              <div id="detailsContainer" ng-show="detailsAreShowing[$parent.$index]">
+              <div id="detailsContainer"> <!-- ng-show="detailsAreShowing[$parent.$index]" -->
                 <md-input-container>
                   <label>Carpool Site</label>
                   <md-select ng-model="day.carpoolSite" aria-label="Carpool Site">

@@ -40,6 +40,6 @@ app.filter('phoneNumber', function($log) {
   return function(input) {
     $log.log("phoneNumber input: " + input)
     var hasLeadingOne = (input.length == 11)
-    return ((hasLeadingOne) ? '+' + input.slice(0, 1) + ' ' : '') + input.slice(0, 3) + '-' + input.slice(0,3) + '-' + input.slice(0, 4)
+    return ((hasLeadingOne) ? '+' + input.substr(0, 3) + ' ' : '') + input.substr(0, 3) + '-' + input.substr(3,3) + '-' + input.substr(6, 4)
   }
 })
