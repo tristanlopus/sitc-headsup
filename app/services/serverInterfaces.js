@@ -64,6 +64,17 @@ app.factory('getExistingDates', ['$log', '$q', '$http', function($log, $q, $http
 
 }])
 
+app.factory('getStartEndDates', ['$log', '$q', '$http', function($log, $q, $http) {
+
+  return function () {
+    return $http({
+      method: 'GET',
+      url: 'app/appServer/getStartEndDates.php'
+    })
+  }
+
+}])
+
 app.factory('submitHeadsUp', ['$log', '$q', '$http', function($log, $q, $http) {
 
   return function (personId, rawParams, genCarpoolSite, genPreferredProject) {
