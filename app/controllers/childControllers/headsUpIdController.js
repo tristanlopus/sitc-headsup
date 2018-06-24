@@ -1,14 +1,22 @@
 var app = angular.module('headsUpApp')
 
-app.controller('HeadsUpIdController', ['$scope', '$log', '$state', 'getPerson', function($scope, $log, $state, getPerson) {
+app.controller('HeadsUpIdController', ['$scope', '$window', '$log', '$state', 'getPerson', function($scope, $window, $log, $state, getPerson) {
   $log.log('Hello, world! HeadsUpIdController is running!')
 
   $scope.potentialPersons = []
+  $scope.notFound = false
 
   $scope.findPerson = function (withEmail) {
     getPerson(withEmail).then(function (persons) {
       $log.log("Response from getPerson(): " + dump(persons, 'none'))
       $scope.potentialPersons = persons
+      $scope.notFound = false
+    }, function notFound () {
+      $log.log("Person not found")
+      $scope.notFound = true
+      var field = $window.document.getElementById('emailInput')
+      field.focus()
+      field.select()
     })
   }
 

@@ -59,10 +59,10 @@
                   <span flex="noshrink" class="md-subhead" style="font-weight:500">{{ months[day.month] }} {{ day.date }}</span>
                 </div>
                 <span flex></span>
-                <md-checkbox ng-model="day.isComing" style="margin-bottom:0" aria-label="Coming this day"></md-checkbox>
+                <md-checkbox ng-model="day.isComing" style="margin-bottom:0" aria-label="Coming this day" ng-disabled="day.dateString == '2018-07-03' || day.dateString == '2018-07-04'"></md-checkbox>
                 <span flex></span>
               </div>
-              <div id="detailsContainer"> <!-- ng-show="detailsAreShowing[$parent.$index]" -->
+              <div id="detailsContainer" ng-show="detailsAreShowing[$parent.$index]" ng-hide="day.dateString == '2018-07-03' || day.dateString == '2018-07-04'"> <!--  -->
                 <md-input-container>
                   <label>Carpool Site</label>
                   <md-select ng-model="day.carpoolSite" aria-label="Carpool Site">
@@ -87,6 +87,11 @@
 
                 </div>
               </div>
+              <div ng-show="day.dateString == '2018-07-03' || day.dateString == '2018-07-04'">
+                <p>
+                  There will be no <br />SITC programming on this day. <br />Enjoy the holiday!
+                </p>
+              </div>
             </td>
           </tr>
         </table>
@@ -100,5 +105,9 @@
     </div>
 
     <md-button class="md-primary md-raised" ng-click="submit()">Submit</md-button>
+
+    <div style="margin-top: 20px">
+      <span style="color: rgba(0, 0, 0, .54)">* HeadsUp is accepted on a rolling basis for two weeks out. Check back next week to give us your HeadsUp for 3 weeks from now!</span>
+    </div>
   </md-card-content>
 </md-card>

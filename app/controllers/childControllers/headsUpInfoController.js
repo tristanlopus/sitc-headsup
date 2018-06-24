@@ -79,6 +79,7 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
         var myDate = new Date(firstProjectDay)
         myDate.setDate(myDate.getDate() + i)
         var myDateString = `${myDate.getFullYear()}-${((myDate.getMonth()+1) < 10) ? '0' : ''}${myDate.getMonth()+1}-${(myDate.getDate() < 10) ? '0' : ''}${myDate.getDate()}`
+        console.log(myDateString)
         dates[myDateString] = {
           indexInWeeks: k,
           indexInWeek: i
@@ -148,7 +149,7 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
     })
   }
 
-
+  $scope.disabledDates
 
   $scope.backToId = function () {
     $state.go('headsUp.id')
@@ -159,9 +160,9 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
   $scope.daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
   $scope.projects = [
-    {id: 'paint', name: 'Paint'},
-    {id: 'plant', name: 'Plant'},
-    {id: 'play', name: 'Play'}
+    {id: 'play', name: 'Youth Enrichment'},
+    {id: 'handsOn', name:'Hands On'},
+    {id: 'all', name: "I'm Flexible"}
   ]
 
 }])

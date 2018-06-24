@@ -33,7 +33,11 @@ app.factory('getPerson', ['$log', '$q', '$http', function($log, $q, $http) {
       }
     }).then(
       function(response) {
-        defer.resolve(response.data)
+        if (response.data.length > 0) {
+          defer.resolve(response.data)
+        } else {
+          defer.reject()
+        }
       },
       function(error) {
         //TODO error handling

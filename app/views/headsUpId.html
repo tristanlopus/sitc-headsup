@@ -1,7 +1,11 @@
 <md-card id="headsUpCard" style="height: 100%; margin-top: 20px">
   <md-card-content>
-    <h2>Heads Up</h2>
-    <span class="md-subhead"><strong>Thank you for giving us a Heads Up for when you plan to volunteer!</strong> This information will help us develop the day and play to your preferences.</span>
+    <h2>HeadsUp</h2>
+    <span class="md-subhead"><strong>Thank you for giving us a HeadsUp for when you plan to volunteer!</strong> This information will help us develop the day and play to your preferences.</span>
+
+    <div style="margin-top: 21.280px">
+      <span class="md-subhead"><strong>Confused about this whole HeadsUp thing?</strong> Check out our <a href="https://vimeo.com/216236888">explainer video</a>.</span>
+    </div>
 
     <div>
       <h4 style="margin-bottom:0">First let's find you in Tristn.</h4>
@@ -9,9 +13,9 @@
     </div>
     <div layout="column">
       <div layout="row">
-        <md-input-container style="margin-bottom: 0">
+        <md-input-container style="margin-bottom: 0" ng-class="{'md-input-invalid': notFound}">
           <label>Email</label>
-          <input type="email" ng-model="emailForQuery" size="40" />
+          <input id="emailInput" type="email" ng-model="emailForQuery" size="40" />
         </md-input-container>
         <span flex></span>
       </div>
@@ -19,6 +23,10 @@
         <md-button class="md-primary" ng-click="findPerson(emailForQuery)">Find me</md-button>
         <span flex></span>
       </div>
+    </div>
+    <div id="notFoundContainer" ng-show="notFound">
+      <h4 style="margin-top: 0">We couldn't find a volunteer with that email address.</h4>
+      <span>Please try again. Make sure that you are using the email address that you used as the <strong>volunteer</strong> email address when you registered, <strong>not</strong> the parent email address</span>
     </div>
     <div id="potentialPersonsContainer">
       <md-list>
