@@ -131,7 +131,7 @@ foreach ($counts as $siteInfo) {
     $textToAdd = str_replace("{{personPhone}}", $phone, $textToAdd);
 
     if ($personInfo['headsUp_hasCar'] == 1 || $personInfo['headsUp_hasCar'] == '1') {
-      $imgText = '<img src="images/drive_eta.png"  height="24px" width="24px" style="opacity: 0.55" />';
+      $imgText = '<img src="http://headsup.summerinthecity.com/app/appServer/images/drive_eta.png"  height="24px" width="24px" style="opacity: 0.55" />';
       $textToAdd = str_replace("{{driverImage}}", $imgText, $textToAdd);
     } else {
       $textToAdd = str_replace("{{driverImage}}", '', $textToAdd);
@@ -145,7 +145,6 @@ foreach ($counts as $siteInfo) {
 }
 $messageText .= $textToAddToMessage;
 
-$
 
 $endFile = fopen( $endFilename, "r" );
 $endFilesize = filesize( $endFilename );
@@ -153,13 +152,6 @@ $messageText .= fread( $endFile, $endFilesize );
 
 echo $messageText;
 
-
-
-
-
-
-
-/*
 //Tell PHPMailer to use SMTP
 $mail->isSMTP();
 
@@ -193,8 +185,11 @@ $mail->Username = "webmaster@summerinthecity.com";
 //Password to use for SMTP authentication
 $mail->Password = "sitc+2-0*0/2";
 
+// Set the reply-to address for the message
+$mail->addReplyTo('tristan@summerinthecity.com', 'Tristan Lopus');
+
 //Set who the message is to be sent from
-$mail->setFrom('tech@summerinthecity.com', 'SITC Registration');
+$mail->setFrom('headsup@summerinthecity.com', 'SITC HeadsUp');
 
 // //Set an alternative reply-to address
 // $mail->addReplyTo('replyto@example.com', 'First Last');
@@ -206,28 +201,9 @@ foreach ($directorEmails as $sendToEmail => $sendToName) {
 // $mail->addAddress('ben@summerinthecity.com', 'Ben');
 
 //Set the subject line
-$mail->Subject = "New car-endowed volunteer: $firstName $lastName";
+$mail->Subject = "Your HeadsUp Daily Digest";
 
-$message = '<html><body>';
-$message .= "<h3 style='padding-bottom:0px'>$firstName $lastName just registered, and they said they can drive.</h3>";
-$message .= "<h4>Follow up with them to seal the deal!</h4>";
-$message .= "<strong>Here's their info:</strong><br />";
-$message .= "<strong>Email: </strong>$email<br />";
-$message .= "<strong>Phone: </strong>$phone<br />";
-$message .= "<strong>High School: </strong>$highSchool, class of $hsGradYear<br />";
-$message .= "<strong>Carpool Site: </strong>$carpoolSite<br />";
-if ($firstTimeTeer == 1 || $firstTimeTeer == '1') {
-  $message .= "<strong>Rookie: </strong>This is $firstName's <strong>first time</strong> volunteering, so be sure to give an extra warm and explanatory welcome.<br />";
-}
-else {
-  $message .= "<strong>Veteran: </strong>$firstName <strong>has</strong> volunteered with us before, so don't worry about re-hashing the basics with them<br />";
-}
-$message .= "<h4>Have a wonderful day.</h4><br />";
-$message .= "<span>All our love,</span><br />";
-$message .= "<span>Tristan & Tristn</span>";
-$message .= '</html></body>';
-
-$mail->msgHTML($message);
+$mail->msgHTML($messageText);
 
 //send the message, check for errors
 if (!$mail->send()) {
@@ -235,7 +211,7 @@ if (!$mail->send()) {
 } else {
     echo "Message sent!";
 }
-*/
+
 
 ?>
 
