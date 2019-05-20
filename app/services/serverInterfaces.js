@@ -1,17 +1,25 @@
-app.factory('getCarpoolSites', ['$log', '$q', '$http', function($log, $q, $http) {
+app.factory('getCarpoolSites', ['$log', '$q', '$http', function ($log, $q, $http) {
 
-  return function() {
+  return function () {
     $log.log('getCarpoolSites ran!')
     var defer = $q.defer()
 
-     $http({
-      url: "app/appServer/getCarpoolSites.php",
+    $http({
+      url: `https://api.airtable.com/v0/${getAirtableBase()}/Carpool%20Sites?api_key=${getAirtableAPIKey()}`,
       method: "GET"
     }).then(
-      function(response) {
-        defer.resolve(response.data)
+      function (response) {
+        var sites = {}
+        console.log(response.data)
+        response.data['records'].forEach(function (currentSite) {
+          sites[currentSite.id] = currentSite.fields
+          sites[currentSite.id]['id'] = currentSite.id
+          console.log(sites[currentSite.id])
+        })
+
+        defer.resolve(sites)
       },
-      function(error) {
+      function (error) {
         //TODO error handling
       })
 
@@ -22,24 +30,22 @@ app.factory('getCarpoolSites', ['$log', '$q', '$http', function($log, $q, $http)
 app.factory('getPerson', ['$log', '$q', '$http', function($log, $q, $http) {
 
   return function (withEmail) {
-    $log.log('getPerson ran!')
     var defer = $q.defer()
 
-     $http({
-      url: "app/appServer/getPerson.php",
-      method: "GET",
-      params: {
-        'email': withEmail
-      }
+    $http({
+      url: `https://api.airtable.com/v0/${getAirtableBase()}/Profiles?api_key=${getAirtableAPIKey()}&filterByFormula={Email}='${withEmail}'`,
+      method: "GET"
     }).then(
-      function(response) {
-        if (response.data.length > 0) {
-          defer.resolve(response.data)
-        } else {
-          defer.reject()
-        }
+      function (response) {
+        var persons = []
+        console.log(response.data)
+        response.data['records'].forEach(function (currentPerson) {
+          persons.push(currentPerson.fields)
+        })
+
+        defer.resolve(persons)
       },
-      function(error) {
+      function (error) {
         //TODO error handling
       })
 
