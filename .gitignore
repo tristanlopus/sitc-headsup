@@ -2,3 +2,5 @@
 bower_components
 
 app/appServer/sitc_workforce_creds.php
+app/host_specific_vars.js
+node_modules/
