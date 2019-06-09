@@ -15,7 +15,7 @@
         <md-input-container>
           <label>Carpool Site</label>
           <md-select ng-model="genInfo.carpoolSite" aria-label="Carpool Site" md-on-close="setDaysInfo('carpoolSite')">
-            <md-option ng-repeat="carpoolSite in carpoolSites" ng-value="carpoolSite.carpoolSite_id">{{ carpoolSite.name }}</md-option>
+            <md-option ng-repeat="(carpoolSiteId, carpoolSiteFields) in carpoolSites" ng-value="carpoolSiteFields['Record ID']">{{ carpoolSiteFields["Name"] }}</md-option>
           </md-select>
         </md-input-container>
         <span flex></span>

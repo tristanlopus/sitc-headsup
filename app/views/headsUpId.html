@@ -1,4 +1,4 @@
-<md-card id="headsUpCard" style="height: 100%; margin-top: 20px">
+<md-card id="headsUpCard" style="margin-top: 20px">
   <md-card-content>
     <h2>HeadsUp</h2>
     <span class="md-subhead"><strong>Thank you for giving us a HeadsUp for when you plan to volunteer!</strong> This information will help us develop the day and play to your preferences.</span>
@@ -33,7 +33,7 @@
         <md-list-item class="md-2-line" ng-repeat="person in potentialPersons track by $index" >
           <div layout="row">
             <div class="md-list-item-text">
-              <h3>{{ person["First Name"] }} {{ person["Last Name"] }}</h3>
+              <h3>{{ person["First Name"] }} {{ person["Last Name "] }}</h3>
               <h4 class="md-subhead" style="font-weight:500">{{ person["Email"] }} | {{ person["Phone"] | phoneNumber }}</h4>
             </div>
             <md-button class="md-primary" ng-click="selectPerson($index)">Select</md-button>

@@ -10,11 +10,9 @@ app.factory('getCarpoolSites', ['$log', '$q', '$http', function ($log, $q, $http
     }).then(
       function (response) {
         var sites = {}
-        console.log(response.data)
         response.data['records'].forEach(function (currentSite) {
           sites[currentSite.id] = currentSite.fields
           sites[currentSite.id]['id'] = currentSite.id
-          console.log(sites[currentSite.id])
         })
 
         defer.resolve(sites)
@@ -77,10 +75,37 @@ app.factory('getExistingDates', ['$log', '$q', '$http', function($log, $q, $http
 app.factory('getStartEndDates', ['$log', '$q', '$http', function($log, $q, $http) {
 
   return function () {
-    return $http({
-      method: 'GET',
-      url: 'app/appServer/getStartEndDates.php'
-    })
+    $log.log('getCarpoolSites ran!')
+    var defer = $q.defer()
+
+    $http({
+      url: `https://api.airtable.com/v0/${getAirtableBase()}/Summer%20Dates?api_key=${getAirtableAPIKey()}`,
+      method: "GET"
+    }).then(
+      function (response) {
+        var dates = {
+          summerStart: {},
+          summerEnd: {},
+          other: [],
+        }
+        response.data['records'].forEach(function (currentDate) {
+          var fields = currentDate.fields;
+          if (fields['Type'] == "Summer Start Date") {
+            dates.summerStart = fields;
+          } else if (fields['Type'] == "Summer End Date") {
+            dates.summerEnd = fields;
+          } else {
+            dates.other.push(fields);
+          }
+        })
+
+        defer.resolve(dates)
+      },
+      function (error) {
+        //TODO error handling
+      })
+
+    return defer.promise
   }
 
 }])

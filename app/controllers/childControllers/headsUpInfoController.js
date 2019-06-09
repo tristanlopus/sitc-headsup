@@ -10,6 +10,7 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
   $scope.genInfo = {}
   $scope.headsUpDays = []
   getCarpoolSites().then(function success (sites) {
+    console.log(sites);
     $scope.carpoolSites = sites
   })
   $scope.detailsAreShowing = [false, false, false]
@@ -17,23 +18,17 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
 
   // find out the dates of the next 2 week's worth of project days, as well as the current week's
   var startEndDates_defer = $q.defer()
-  getStartEndDates().then(function (response) {
-    $log.log("Summer start date, raw: " + response.data.summerStartDate)
-    var startDate_raw = response.data.summerStartDate
-    $scope.summerStartDate = new Date()
-    $scope.summerStartDate.setYear(parseInt(startDate_raw.substring(0, 4)))
-    $scope.summerStartDate.setMonth(parseInt(startDate_raw.substring(5, 7)) - 1)
-    $scope.summerStartDate.setDate(parseInt(startDate_raw.substring(8)))
+  getStartEndDates().then(function (dates) {
+    console.log(dates);
+    $scope.dates = dates;
+    $log.log("Summer start date, raw: " + $scope.dates.summerStart['Date']);
+    $scope.dates.summerStart['jsDate'] = new Date($scope.dates.summerStart['Date']);
+    console.log("Summer start month: " + $scope.dates.summerStart.jsDate.getMonth());
+    console.log("Summer start year: " + $scope.dates.summerStart.jsDate.getFullYear());
 
-    var endDate_raw = response.data.summerEndDate
-    $scope.summerEndDate = new Date()
-    $scope.summerEndDate.setYear(parseInt(endDate_raw.substring(0, 4)))
-    $scope.summerEndDate.setMonth(parseInt(endDate_raw.substring(5, 7)) - 1)
-    $scope.summerEndDate.setDate(parseInt(endDate_raw.substring(8)))
+    $scope.dates.summerEnd['jsDate'] = new Date($scope.dates.summerEnd['Date']);
 
     startEndDates_defer.resolve()
-    $log.log("Summer start date: " + $scope.summerStartDate)
-    $log.log("Summer end date: " + $scope.summerEndDate)
   }, function (error) {
     startEndDates_defer.resolve()
   })
@@ -41,6 +36,8 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
   startEndDates_defer.promise.then(function () {
     var today = new Date()
     var showCurrentWeek = false
+
+    // if tomorrow is a project day, and it is after 10 p.m., disable tomorrow
 
     if ($scope.summerStartDate && $scope.summerStartDate.getTime() > today.getTime()) {
       $scope.showCurrentWeek = false
@@ -67,11 +64,20 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
       } while (today.getDay() != 2)
     }
 
-    var firstProjectDay = today
     $scope.weeks = []
     var dates = {} // array of all the dates, used later in getExistingDates().then()
     var loopStop = (showCurrentWeek) ? 3 : 2
     var defer = $q.defer()
+    var PROJECT_DAYS_PER_WEEK = 4;
+    var currentDate = new Date($scope.dates.summerStart.jsDate);
+    var k = 0;
+    while (currentDate <= $scope.dates.summerEnd.jsDate) {
+      var weekIndex = parseInt(k / 4);
+      var dayIndex = k % 4;
+      $scope.weeks[weekIndex][dayIndex] = 
+    }
+
+
     for (var k = 0; k < loopStop; k++) {
       // week is an array of day objects
       var week = []
