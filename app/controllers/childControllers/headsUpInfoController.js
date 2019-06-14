@@ -16,121 +16,77 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
   $scope.detailsAreShowing = [false, false, false]
 
 
-  // find out the dates of the next 2 week's worth of project days, as well as the current week's
   var startEndDates_defer = $q.defer()
   getStartEndDates().then(function (dates) {
     console.log(dates);
     $scope.dates = dates;
     $log.log("Summer start date, raw: " + $scope.dates.summerStart['Date']);
-    $scope.dates.summerStart['jsDate'] = new Date($scope.dates.summerStart['Date']);
+    // transform the date from UTC to local
+    // Since these dates come with a default time of 00:00 UTC, when they are used to initialize date objects on clients with negative UTC offsets, they result in date objects for the day before the day actually intended.
+    var startDate = new Date($scope.dates.summerStart['Date']);
+    startDate.setMinutes(startDate.getMinutes() + startDate.getTimezoneOffset());
+    $scope.dates.summerStart['jsDate'] = startDate;
     console.log("Summer start month: " + $scope.dates.summerStart.jsDate.getMonth());
     console.log("Summer start year: " + $scope.dates.summerStart.jsDate.getFullYear());
 
-    $scope.dates.summerEnd['jsDate'] = new Date($scope.dates.summerEnd['Date']);
+    // transform the date from UTC to local
+    var endDate = new Date($scope.dates.summerEnd['Date']);
+    endDate.setMinutes(endDate.getMinutes() + endDate.getTimezoneOffset());
+    $scope.dates.summerEnd['jsDate'] = endDate;
+
+    $scope.dates.daysOff.forEach(function (dayOff) {
+      var jsDate = new Date(dayOff['Date']);
+      dayOff['jsDate'] = jsDate;
+    });
+
+    console.log($scope.dates);
 
     startEndDates_defer.resolve()
   }, function (error) {
     startEndDates_defer.resolve()
   })
 
+  var existingDates_defer = $q.defer();
   startEndDates_defer.promise.then(function () {
-    var today = new Date()
-    var showCurrentWeek = false
+    getExistingDates($scope.person["Record ID"]).then(function (existingDates) {
+      $scope.existingDates = existingDates;
+      existingDates_defer.resolve();
+    })
+  })
 
-    // if tomorrow is a project day, and it is after 10 p.m., disable tomorrow
-
-    if ($scope.summerStartDate && $scope.summerStartDate.getTime() > today.getTime()) {
-      $scope.showCurrentWeek = false
-      today = $scope.summerStartDate
-    }
-    else if (today.getDay() == 2) {
-      showCurrentWeek = true
-    }
-    else if (today.getDay() > 2 && today.getDay() < 6) {
-      // go backwards until we hit the first Tuesday
-      do {
-        today.setDate(today.getDate() - 1)
-      } while (today.getDay() != 2)
-
-      // as long as it's not Friday after 8 a.m., show the current week
-      if (!(today.getDay() == 5 && today.getHours() > 8)) {
-        showCurrentWeek = true
-      }
-    }
-    else {
-      // go forward until we hit the first Tuesday
-      do {
-        today.setDate(today.getDate() + 1)
-      } while (today.getDay() != 2)
-    }
-
-    $scope.weeks = []
-    var dates = {} // array of all the dates, used later in getExistingDates().then()
-    var loopStop = (showCurrentWeek) ? 3 : 2
-    var defer = $q.defer()
+  existingDates_defer.promise.then(function () {
+    var NUM_DAYS_IN_ONE_WEEK = 7;
     var PROJECT_DAYS_PER_WEEK = 4;
-    var currentDate = new Date($scope.dates.summerStart.jsDate);
-    var k = 0;
-    while (currentDate <= $scope.dates.summerEnd.jsDate) {
-      var weekIndex = parseInt(k / 4);
-      var dayIndex = k % 4;
-      $scope.weeks[weekIndex][dayIndex] = 
-    }
-
-
-    for (var k = 0; k < loopStop; k++) {
-      // week is an array of day objects
-      var week = []
-      for (var i = 0; i < 4; i++) {
-        var myDate = new Date(firstProjectDay)
-        myDate.setDate(myDate.getDate() + i)
-        var myDateString = `${myDate.getFullYear()}-${((myDate.getMonth()+1) < 10) ? '0' : ''}${myDate.getMonth()+1}-${(myDate.getDate() < 10) ? '0' : ''}${myDate.getDate()}`
-        console.log(myDateString)
-        dates[myDateString] = {
-          indexInWeeks: k,
-          indexInWeek: i
-        }
-        week.push({
-          date: new Date(myDate),
+    var OFF_DAYS_PER_WEEK = NUM_DAYS_IN_ONE_WEEK - PROJECT_DAYS_PER_WEEK;
+    var weeks = [];
+    var iteratingDate = $scope.dates.summerStart.jsDate;
+    console.log("start date: " + iteratingDate.getDay());
+    var currentWeek = 0;
+    while (iteratingDate < $scope.dates.summerEnd.jsDate) {
+      weeks.push(new Array());
+      for (var k = 0; k < PROJECT_DAYS_PER_WEEK; k++) {
+        var myDateString = `${iteratingDate.getFullYear()}-${((iteratingDate.getMonth() + 1) < 10) ? '0' : ''}${iteratingDate.getMonth() + 1}-${(iteratingDate.getDate() < 10) ? '0' : ''}${iteratingDate.getDate()}`;
+        weeks[currentWeek].push({
+          date: new Date(iteratingDate),
           dateString: myDateString,
-          year: myDate.getFullYear(),
-          month: myDate.getMonth(),
-          date: parseInt(((myDate.getDate() < 10) ? '0':'') + myDate.getDate()),
-          day: myDate.getDay(),
+          year: iteratingDate.getFullYear(),
+          month: iteratingDate.getMonth(),
+          date: parseInt(((iteratingDate.getDate() < 10) ? '0' : '') + iteratingDate.getDate()),
+          day: iteratingDate.getDay(),
           isComing: false,
           preferredProject: null,
           carpoolSite: null,
           hasCar: null,
-          numSeatbelts: null
-        })
+          numSeatbelts: null,
+          enable: ((iteratingDate >= $scope.dates.summerStart.jsDate) && (iteratingDate <= $scope.dates.summerEnd.jsDates))
+        });
+        iteratingDate.setDate(iteratingDate.getDate() + 1);
       }
-      firstProjectDay.setDate(firstProjectDay.getDate() + 7)
-      $log.log("Setting firstProjectDay to " + firstProjectDay.toLocaleDateString() + " with day of the week " + firstProjectDay.getDay())
-      $scope.weeks.push(week)
-
-      if (k == (loopStop - 1)) {
-        defer.resolve()
-      }
+      iteratingDate.setDate(iteratingDate.getDate() + 3);
+      currentWeek++;
     }
-
-    // $log.log("Weeks: " + dump($scope.weeks, 'none'))
-
-    defer.promise.then(function () {
-      getExistingDates($scope.person.person_id, Object.keys(dates)).then(function (existingDates) {
-        if (existingDates && existingDates.length > 0) {
-          $log.log("Existing Dates: " + dump(existingDates, 'none'))
-          $scope.genInfo.carpoolSite = existingDates[0].carpoolSite_id
-          $scope.genInfo.preferredProject = existingDates[0].headsUp_preferredProject
-          angular.forEach(existingDates, function(dateInfo) {
-            $scope.weeks[dates[dateInfo.forDate].indexInWeeks][dates[dateInfo.forDate].indexInWeek].isComing = (parseInt(dateInfo.isComing)) ? true : false
-            $scope.weeks[dates[dateInfo.forDate].indexInWeeks][dates[dateInfo.forDate].indexInWeek].carpoolSite = dateInfo.carpoolSite_id
-            $scope.weeks[dates[dateInfo.forDate].indexInWeeks][dates[dateInfo.forDate].indexInWeek].preferredProject = dateInfo.headsUp_preferredProject
-            $scope.weeks[dates[dateInfo.forDate].indexInWeeks][dates[dateInfo.forDate].indexInWeek].hasCar = (parseInt(dateInfo.headsUp_hasCar)) ? true : false
-            $scope.weeks[dates[dateInfo.forDate].indexInWeeks][dates[dateInfo.forDate].indexInWeek].numSeatbelts = parseInt(dateInfo.headsUp_numSeatbelts)
-          })
-        }
-      })
-    })
+    console.log(weeks);
+    $scope.weeks = $scope.weeks_initial = weeks;
   })
 
   $scope.submit = function () {
@@ -150,7 +106,9 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
   $scope.setDaysInfo = function (param) {
     angular.forEach($scope.weeks, function (week) {
       angular.forEach(week, function(day) {
-        day[param] = $scope.genInfo[param]
+        if (day.enabled) {
+          day[param] = $scope.genInfo[param]
+        }
       })
     })
   }

@@ -51,21 +51,29 @@ app.factory('getPerson', ['$log', '$q', '$http', function($log, $q, $http) {
   }
 }])
 
-app.factory('getExistingDates', ['$log', '$q', '$http', function($log, $q, $http) {
+app.factory('getExistingDates', ['$log', '$q', '$http', function ($log, $q, $http) {
 
-  return function (withPersonId, forDates) {
+  return function (personId) {
+    $log.log('getCarpoolSites ran!')
     var defer = $q.defer()
 
     $http({
-      method: 'GET',
-      url: 'app/appServer/getExistingDates.php',
-      params: {
-        person_id: withPersonId,
-        dates: JSON.stringify(forDates)
-      }
-    }).then(function (response) {
-      defer.resolve(response.data)
-    })
+      url: `https://api.airtable.com/v0/${getAirtableBase()}/Heads%20Up?api_key=${getAirtableAPIKey()}`,
+      method: "GET",
+      filterByFormula: `{Volunteer ID} = ${personId}`
+    }).then(
+      function (response) {
+
+        var existingDates = new Array();
+        response.data['records'].forEach(function (currentDate) {
+          existingDates.push(currentDate.fields);
+        });
+
+        defer.resolve(existingDates);
+      },
+      function (error) {
+        //TODO error handling
+      })
 
     return defer.promise
   }
@@ -86,7 +94,7 @@ app.factory('getStartEndDates', ['$log', '$q', '$http', function($log, $q, $http
         var dates = {
           summerStart: {},
           summerEnd: {},
-          other: [],
+          daysOff: [],
         }
         response.data['records'].forEach(function (currentDate) {
           var fields = currentDate.fields;
@@ -94,8 +102,8 @@ app.factory('getStartEndDates', ['$log', '$q', '$http', function($log, $q, $http
             dates.summerStart = fields;
           } else if (fields['Type'] == "Summer End Date") {
             dates.summerEnd = fields;
-          } else {
-            dates.other.push(fields);
+          } else if (fields['Type'] == "Day Off") {
+            dates.daysOff.push(fields);
           }
         })
 
