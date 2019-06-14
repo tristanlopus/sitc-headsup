@@ -39,8 +39,6 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
       dayOff['jsDate'] = jsDate;
     });
 
-    console.log($scope.dates);
-
     startEndDates_defer.resolve()
   }, function (error) {
     startEndDates_defer.resolve()
