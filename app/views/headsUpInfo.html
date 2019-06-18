@@ -55,39 +55,44 @@
             <td class="dayContainer" ng-repeat="day in week">
               <div layout="row" layout-align="start center">
                 <div id="day_dateContainer" layout="column" style="padding-left: 5px">
-                  <span style="opacity: .54; font-weight: 700">{{ daysOfWeek[day.day]}}</span>
-                  <span flex="noshrink" class="md-subhead" style="font-weight:500">{{ months[day.month] }} {{ day.date }}</span>
+                  <span style="opacity: .54; font-weight: 700">{{ daysOfWeek[dates[day].day]}}</span>
+                  <span flex="noshrink" class="md-subhead" style="font-weight:500">{{ months[dates[day].month] }} {{ dates[day].date }}</span>
                 </div>
                 <span flex></span>
-                <md-checkbox ng-model="day.isComing" style="margin-bottom:0" aria-label="Coming this day" ng-disabled="day.dateString == '2018-07-03' || day.dateString == '2018-07-04'"></md-checkbox>
+                <md-checkbox ng-model="dates[day].isComing" style="margin-bottom:0" aria-label="Coming this day"
+                  ng-disabled="!dates[day].enabled">
+                </md-checkbox>
                 <span flex></span>
               </div>
-              <div id="detailsContainer" ng-show="detailsAreShowing[$parent.$index]" ng-hide="day.dateString == '2018-07-03' || day.dateString == '2018-07-04'"> <!--  -->
+              <div id="detailsContainer" ng-show="detailsAreShowing[$parent.$index]"
+                ng-hide="dates[day].dateString == '2018-07-03' || dates[day].dateString == '2018-07-04'">
+                <!--  -->
                 <md-input-container>
                   <label>Carpool Site</label>
-                  <md-select ng-model="day.carpoolSite" aria-label="Carpool Site">
-                    <md-option ng-repeat="carpoolSite in carpoolSites" ng-value="carpoolSite.carpoolSite_id">{{ carpoolSite.name }}</md-option>
+                  <md-select ng-model="dates[day].carpoolSite" aria-label="Carpool Site">
+                    <md-option ng-repeat="carpoolSite in carpoolSites" ng-value="carpoolSite['Record ID']">{{ carpoolSite['Name'] }}</md-option>
                   </md-select>
                 </md-input-container>
                 <md-input-container>
                   <label>Preferred Project</label>
-                  <md-select ng-model="day.preferredProject" aria-label="Preferred Project">
+                  <md-select ng-model="dates[day].preferredProject" aria-label="Preferred Project">
                     <md-option ng-repeat="project in projects" ng-value="project.id">{{ project.name }}</md-option>
                   </md-select>
                 </md-input-container>
                 <div id="drivingDetails" style="margin-top: 10px">
                   <div style="margin-bottom: 10px; padding-left:7px; font-size: 14px; font-weight: 500; opacity: .54">Driving</div>
                   <md-input-container style="margin-bottom:0">
-                    <md-checkbox ng-model="day.hasCar" aria-label="I can drive">Can drive if needed</md-checkbox>
+                    <md-checkbox ng-model="dates[day].hasCar" aria-label="I can drive">Can drive if needed</md-checkbox>
                   </md-input-container>
-                  <md-input-container ng-show="day.hasCar">
+                  <md-input-container ng-show="dates[day].hasCar">
                     <label># of seatbelts</label>
-                    <input type="number" ng-model="day.numSeatbelts" style="width:104px" aria-label="Number of seatbelts in car"/>
+                    <input type="number" ng-model="dates[day].numSeatbelts" style="width:104px"
+                      aria-label="Number of seatbelts in car" />
                   </md-input-container>
 
                 </div>
               </div>
-              <div ng-show="day.dateString == '2018-07-03' || day.dateString == '2018-07-04'">
+              <div ng-show="dates[day].dateString == '2018-07-03' || dates[day].dateString == '2018-07-04'">
                 <p>
                   There will be no <br />SITC programming on this day. <br />Enjoy the holiday!
                 </p>

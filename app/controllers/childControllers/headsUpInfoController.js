@@ -1,5 +1,8 @@
 var app = angular.module('headsUpApp')
 
+var dates_initial = {};
+var existingDates = {};
+
 app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$stateParams', 'getCarpoolSites', 'submitHeadsUp', 'getExistingDates', 'getStartEndDates', function($scope, $log, $q, $state, $stateParams, getCarpoolSites, submitHeadsUp, getExistingDates, getStartEndDates) {
   $log.log('Hello, world! HeadsUpInfoController is running!')
 
@@ -46,8 +49,12 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
 
   var existingDates_defer = $q.defer();
   startEndDates_defer.promise.then(function () {
-    getExistingDates($scope.person["Record ID"]).then(function (existingDates) {
-      $scope.existingDates = existingDates;
+    getExistingDates($scope.person["RecordID"]).then(function (existingDatesResponse) {
+      var existingDatesObj = {};
+      existingDatesResponse.forEach(function (date) {
+        existingDatesObj[date["Date"]] = date;
+      })
+      existingDates = existingDatesObj;
       existingDates_defer.resolve();
     })
   })
@@ -57,43 +64,84 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
     var PROJECT_DAYS_PER_WEEK = 4;
     var OFF_DAYS_PER_WEEK = NUM_DAYS_IN_ONE_WEEK - PROJECT_DAYS_PER_WEEK;
     var weeks = [];
+    var dates = {};
     var iteratingDate = $scope.dates.summerStart.jsDate;
     console.log("start date: " + iteratingDate.getDay());
-    var currentWeek = 0;
+    // var currentWeek = 0;
     while (iteratingDate < $scope.dates.summerEnd.jsDate) {
       weeks.push(new Array());
       for (var k = 0; k < PROJECT_DAYS_PER_WEEK; k++) {
         var myDateString = `${iteratingDate.getFullYear()}-${((iteratingDate.getMonth() + 1) < 10) ? '0' : ''}${iteratingDate.getMonth() + 1}-${(iteratingDate.getDate() < 10) ? '0' : ''}${iteratingDate.getDate()}`;
-        weeks[currentWeek].push({
+        weeks[weeks.length - 1].push(myDateString);
+
+        var myIsComing = false;
+        var myPreferredProject = null;
+        var myCarpoolSite = null;
+        var myHasCar = null;
+        var myNumSeatbelts = null;
+
+        if (existingDates[myDateString]) {
+          myIsComing = true;
+
+          var myExistingDate = existingDates[myDateString];
+
+          if (myExistingDate["Project Preference"]) {
+            myPreferredProject = myExistingDate["Project Preference"]
+          }
+          if (myExistingDate["Carpool Site"]) {
+            myCarpoolSite = myExistingDate["Carpool Site"][0]
+          }
+          if (myExistingDate["Can Drive"]) {
+            myHasCar = myExistingDate["Can Drive"]
+          }
+          if (myExistingDate["Seatbelts"]) {
+            myNumSeatbelts = myExistingDate["Seatbelts"]
+          }
+        }
+        
+        
+        dates[myDateString] = {
           date: new Date(iteratingDate),
           dateString: myDateString,
           year: iteratingDate.getFullYear(),
           month: iteratingDate.getMonth(),
           date: parseInt(((iteratingDate.getDate() < 10) ? '0' : '') + iteratingDate.getDate()),
           day: iteratingDate.getDay(),
-          isComing: false,
-          preferredProject: null,
-          carpoolSite: null,
-          hasCar: null,
-          numSeatbelts: null,
-          enable: ((iteratingDate >= $scope.dates.summerStart.jsDate) && (iteratingDate <= $scope.dates.summerEnd.jsDates))
-        });
+          isComing: myIsComing,
+          preferredProject: myPreferredProject,
+          carpoolSite: myCarpoolSite,
+          hasCar: myHasCar,
+          numSeatbelts: myNumSeatbelts,
+          enabled: ((iteratingDate >= $scope.dates.summerStart.jsDate) && (iteratingDate <= $scope.dates.summerEnd.jsDate))
+        };
         iteratingDate.setDate(iteratingDate.getDate() + 1);
       }
       iteratingDate.setDate(iteratingDate.getDate() + 3);
-      currentWeek++;
     }
     console.log(weeks);
-    $scope.weeks = $scope.weeks_initial = weeks;
+    console.log(dates);
+    $scope.weeks = weeks;
+    $scope.dates = dates;
+    Object.keys(dates).forEach(function (dateString) {
+      dates_initial[dateString] = Object.assign({}, dates[dateString]);
+    })
   })
 
   $scope.submit = function () {
-    var arrayToPass = $scope.weeks[0].concat($scope.weeks[1])
-    if ($scope.weeks[2]) {
-      $log.log("Passing weeks[2]")
-      arrayToPass = arrayToPass.concat($scope.weeks[2])
-    }
-    submitHeadsUp($scope.person.person_id, arrayToPass, $scope.genInfo.carpoolSite, $scope.genInfo.preferredProject).then(function (response) {
+    var modifiedDates = [];
+
+    console.log($scope.dates);
+    console.log(dates_initial);
+
+    Object.keys($scope.dates).forEach(function (dateString) {
+      if (!objsAreEquivalent($scope.dates[dateString], dates_initial[dateString])) {
+        modifiedDates.push($scope.dates[dateString]);
+      }
+    });
+
+    console.log(modifiedDates);
+
+    submitHeadsUp($scope.person["PersonID"], modifiedDates, existingDates).then(function (response) {
       $log.log("Response from submitHeadsUp: " + dump(response, 'none'))
       $state.go('headsUp.confirm')
     }, function failure (error) {
@@ -102,16 +150,12 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
   }
 
   $scope.setDaysInfo = function (param) {
-    angular.forEach($scope.weeks, function (week) {
-      angular.forEach(week, function(day) {
-        if (day.enabled) {
-          day[param] = $scope.genInfo[param]
-        }
-      })
+    angular.forEach(Object.keys($scope.dates), function (dateString) {
+      if ($scope.dates[dateString].enabled) {
+        $scope.dates[dateString][param] = $scope.genInfo[param];
+      }
     })
   }
-
-  $scope.disabledDates
 
   $scope.backToId = function () {
     $state.go('headsUp.id')
@@ -122,9 +166,19 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
   $scope.daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
   $scope.projects = [
-    {id: 'play', name: 'Youth Enrichment'},
-    {id: 'handsOn', name:'Hands On'},
-    {id: 'all', name: "I'm Flexible"}
+    {id: 'Play', name: 'Youth Enrichment'},
+    {id: 'Hands-On', name:'Hands On'},
+    {id: 'No Preference', name: "I'm Flexible"}
   ]
 
 }])
+
+function objsAreEquivalent(obj1, obj2) {
+  if (Object.keys(obj1).length != Object.keys(obj2).length) {
+    return false;
+  }
+
+  return Object.keys(obj1).every(function (key) {
+    return obj1[key] === obj2[key]
+  });
+}

@@ -120,20 +120,96 @@ app.factory('getStartEndDates', ['$log', '$q', '$http', function($log, $q, $http
 
 app.factory('submitHeadsUp', ['$log', '$q', '$http', function($log, $q, $http) {
 
-  return function (personId, rawParams, genCarpoolSite, genPreferredProject) {
+  return function (personId, rawDateData, existingDates) {
 
-    var paramsToPass = JSON.stringify(rawParams)
+    // To iterate over an array asynchronously — in our case, so that several Airtable calls can be made simultaneously — requires some convoluted logic
+    // Thank you to Maxim (https://stackoverflow.com/users/347735/maxim) on Stack Overflow for this solution
+    var dates = rawDateData;
 
-    return $http({
-      method: 'POST',
-      url: 'app/appServer/submitHeadsUp.php',
-      params: {
-        person_id: personId,
-        headsUpData: paramsToPass,
-        genCarpoolSite: genCarpoolSite,
-        genPreferredProject: genPreferredProject
+    console.log("PERSON ID: " + personId);
+
+    // for each date, determine whether the corresponding record needs to be created or updated
+    var existingDateStrings = Object.keys(existingDates);
+    var requestObjs = [];
+    for (var k = 0; k < dates.length; k++) {
+      var date = dates[k];
+      var reqObj = {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        data: {
+          "fields": {}
+        }
+      };
+      if (existingDateStrings.includes(date.dateString)) {
+        reqObj['url'] = `https://api.airtable.com/v0/${getAirtableBase()}/Heads%20Up/${existingDates[date.dateString]["Record ID"]}?api_key=${getAirtableAPIKey()}`;
+
+        if (!date.isComing) {
+          reqObj['method'] = "DELETE"
+          continue;
+        } else {
+          reqObj['method'] = "PATCH"
+        }
+      } else {
+        if (!date.isComing) {
+          continue;
+        }
+
+        reqObj['url'] = `https://api.airtable.com/v0/${getAirtableBase()}/Heads%20Up?api_key=${getAirtableAPIKey()}`,
+        reqObj['method'] = "POST"
+        reqObj.data.fields["Volunteer ID"] = [personId];
+        reqObj.data.fields["Date"] = date.dateString;
       }
-    })
+
+      if (date.carpoolSite) {
+        reqObj.data.fields["Carpool Site"] = [date.carpoolSite];
+      }
+      if (date.preferredProject) {
+        reqObj.data.fields["Project Preference"] = date.preferredProject;
+      }
+      if (date.hasCar) {
+        reqObj.data.fields["Can Drive"] = date.hasCar;
+      }
+      if (date.numSeatbelts) {
+        reqObj.data.fields["Seatbelts"] = date.numSeatbelts;
+      }
+      
+      requestObjs.push(reqObj);
+    }
+
+    // This is your async function, which may perform call to your database or
+    // whatever...
+    function sendRequestToAirtable(reqObj, cb) {
+      return $http(reqObj);
+    }
+
+    // cb will be called when each item from arr has been processed and all
+    // results are available.
+    function eachAsync(reqObjs, func, defer) {
+      var doneCounter = 0,
+        results = [];
+      var recvdError = false;
+      reqObjs.forEach(function (reqObj) {
+        func(reqObj).then(function (res) {
+          doneCounter++;
+          if (!res.id) {
+            recvdError = true;
+          }
+          if (doneCounter === reqObjs.length) {
+            if (recvdError) {
+              defer.reject();
+            } else {
+              defer.resolve();
+            }
+          }
+        });
+      });
+    }
+
+    var defer = $q.defer();
+    eachAsync(requestObjs, sendRequestToAirtable, defer);
+    return defer.promise;
+
 
   }
 
