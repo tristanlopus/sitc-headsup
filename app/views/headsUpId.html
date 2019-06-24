@@ -25,16 +25,21 @@
       </div>
     </div>
     <div id="notFoundContainer" ng-show="notFound">
-      <h4 style="margin-top: 0">We couldn't find a volunteer with that email address.</h4>
-      <span>Please try again. Make sure that you are using the email address that you used as the <strong>volunteer</strong> email address when you registered, <strong>not</strong> the parent email address</span>
+      <div ng-show="showNotFoundErrMessage">
+        <h4 style="margin-top: 0">We couldn't find a volunteer with that email address.</h4>
+        <span>Please try again. Make sure that you are using the email address that you used as the <strong>volunteer</strong> email address when you registered, <strong>not</strong> the parent email address</span>.
+      </div>
+      <div ng-show="showServerErrMessage">
+        <h4 style="margin-top: 0">There was a glitch on our end. Try that again.</h4>
+      </div>
     </div>
     <div id="potentialPersonsContainer">
       <md-list>
         <md-list-item class="md-2-line" ng-repeat="person in potentialPersons track by $index" >
           <div layout="row">
             <div class="md-list-item-text">
-              <h3>{{ person["First Name"] }} {{ person["Last Name "] }}</h3>
-              <h4 class="md-subhead" style="font-weight:500">{{ person["Email"] }} | {{ person["Phone"] | phoneNumber }}</h4>
+              <h3>{{ person["First Name"] }} {{ person["Last Name"] }}</h3>
+              <h4 class="md-subhead" style="font-weight:500">{{ person["Email"] }} | {{ person["Phone"] }}</h4>
             </div>
             <md-button class="md-primary" ng-click="selectPerson($index)">Select</md-button>
           </div>

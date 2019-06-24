@@ -146,6 +146,7 @@ app.factory('submitHeadsUp', ['$log', '$q', '$http', function($log, $q, $http) {
 
         if (!date.isComing) {
           reqObj['method'] = "DELETE"
+          requestObjs.push(reqObj);
           continue;
         } else {
           reqObj['method'] = "PATCH"
@@ -170,8 +171,8 @@ app.factory('submitHeadsUp', ['$log', '$q', '$http', function($log, $q, $http) {
       if (date.hasCar) {
         reqObj.data.fields["Can Drive"] = date.hasCar;
       }
-      if (date.numSeatbelts) {
-        reqObj.data.fields["Seatbelts"] = date.numSeatbelts;
+      if (date.numPassengers) {
+        reqObj.data.fields["Passengers"] = date.numPassengers;
       }
       
       requestObjs.push(reqObj);
@@ -192,7 +193,7 @@ app.factory('submitHeadsUp', ['$log', '$q', '$http', function($log, $q, $http) {
       reqObjs.forEach(function (reqObj) {
         func(reqObj).then(function (res) {
           doneCounter++;
-          if (!res.id) {
+          if (!res.data.id) {
             recvdError = true;
           }
           if (doneCounter === reqObjs.length) {

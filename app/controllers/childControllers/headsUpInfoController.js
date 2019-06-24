@@ -22,25 +22,32 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
   var startEndDates_defer = $q.defer()
   getStartEndDates().then(function (dates) {
     console.log(dates);
-    $scope.dates = dates;
-    $log.log("Summer start date, raw: " + $scope.dates.summerStart['Date']);
+    $scope.fixedDates = dates;
+    $log.log("Summer start date, raw: " + $scope.fixedDates.summerStart['Date']);
     // transform the date from UTC to local
     // Since these dates come with a default time of 00:00 UTC, when they are used to initialize date objects on clients with negative UTC offsets, they result in date objects for the day before the day actually intended.
-    var startDate = new Date($scope.dates.summerStart['Date']);
+    var startDate = new Date($scope.fixedDates.summerStart['Date']);
     startDate.setMinutes(startDate.getMinutes() + startDate.getTimezoneOffset());
-    $scope.dates.summerStart['jsDate'] = startDate;
-    console.log("Summer start month: " + $scope.dates.summerStart.jsDate.getMonth());
-    console.log("Summer start year: " + $scope.dates.summerStart.jsDate.getFullYear());
+    $scope.fixedDates.summerStart['jsDate'] = startDate;
+    console.log("Summer start month: " + $scope.fixedDates.summerStart.jsDate.getMonth());
+    console.log("Summer start year: " + $scope.fixedDates.summerStart.jsDate.getFullYear());
 
     // transform the date from UTC to local
-    var endDate = new Date($scope.dates.summerEnd['Date']);
+    var endDate = new Date($scope.fixedDates.summerEnd['Date']);
     endDate.setMinutes(endDate.getMinutes() + endDate.getTimezoneOffset());
-    $scope.dates.summerEnd['jsDate'] = endDate;
+    $scope.fixedDates.summerEnd['jsDate'] = endDate;
 
-    $scope.dates.daysOff.forEach(function (dayOff) {
+    $scope.fixedDates.dayOffNotes = {};
+    $scope.fixedDates.daysOff.forEach(function (dayOff) {
       var jsDate = new Date(dayOff['Date']);
+      jsDate.setMinutes(jsDate.getMinutes() + jsDate.getTimezoneOffset(0));
       dayOff['jsDate'] = jsDate;
+
+      var dateString = `${jsDate.getFullYear()}-${((jsDate.getMonth() + 1) < 10) ? '0' : ''}${jsDate.getMonth() + 1}-${(jsDate.getDate() < 10) ? '0' : ''}${jsDate.getDate()}`;
+      dayOff['dateString'] = dateString;
+      $scope.fixedDates.dayOffNotes[dateString] = dayOff["HeadsUp Note"];
     });
+    console.log($scope.fixedDates.dayOffNotes["2019-07-04"]);
 
     startEndDates_defer.resolve()
   }, function (error) {
@@ -65,10 +72,13 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
     var OFF_DAYS_PER_WEEK = NUM_DAYS_IN_ONE_WEEK - PROJECT_DAYS_PER_WEEK;
     var weeks = [];
     var dates = {};
-    var iteratingDate = $scope.dates.summerStart.jsDate;
+    var iteratingDate = $scope.fixedDates.summerStart.jsDate;
     console.log("start date: " + iteratingDate.getDay());
     // var currentWeek = 0;
-    while (iteratingDate < $scope.dates.summerEnd.jsDate) {
+    var disableDates = $scope.fixedDates.daysOff.map(function (dateObj) {
+      return dateObj.dateString;
+    })
+    while (iteratingDate < $scope.fixedDates.summerEnd.jsDate) {
       weeks.push(new Array());
       for (var k = 0; k < PROJECT_DAYS_PER_WEEK; k++) {
         var myDateString = `${iteratingDate.getFullYear()}-${((iteratingDate.getMonth() + 1) < 10) ? '0' : ''}${iteratingDate.getMonth() + 1}-${(iteratingDate.getDate() < 10) ? '0' : ''}${iteratingDate.getDate()}`;
@@ -78,7 +88,7 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
         var myPreferredProject = null;
         var myCarpoolSite = null;
         var myHasCar = null;
-        var myNumSeatbelts = null;
+        var myNumPassengers = null;
 
         if (existingDates[myDateString]) {
           myIsComing = true;
@@ -94,11 +104,12 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
           if (myExistingDate["Can Drive"]) {
             myHasCar = myExistingDate["Can Drive"]
           }
-          if (myExistingDate["Seatbelts"]) {
-            myNumSeatbelts = myExistingDate["Seatbelts"]
+          if (myExistingDate["Passengers"]) {
+            myNumPassengers = myExistingDate["Passengers"]
           }
         }
-        
+      
+        console.log(myDateString + ": " + !disableDates.includes(myDateString));
         
         dates[myDateString] = {
           date: new Date(iteratingDate),
@@ -111,8 +122,8 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
           preferredProject: myPreferredProject,
           carpoolSite: myCarpoolSite,
           hasCar: myHasCar,
-          numSeatbelts: myNumSeatbelts,
-          enabled: ((iteratingDate >= $scope.dates.summerStart.jsDate) && (iteratingDate <= $scope.dates.summerEnd.jsDate))
+          numPassengers: myNumPassengers,
+          enabled: ((iteratingDate >= $scope.fixedDates.summerStart.jsDate) && (iteratingDate <= $scope.fixedDates.summerEnd.jsDate) && !disableDates.includes(myDateString))
         };
         iteratingDate.setDate(iteratingDate.getDate() + 1);
       }
@@ -145,6 +156,7 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
       $log.log("Response from submitHeadsUp: " + dump(response, 'none'))
       $state.go('headsUp.confirm')
     }, function failure (error) {
+      console.log(error);
       $log.log("submitHeadsUp failed!: " + dump(error, 'none'))
     })
   }

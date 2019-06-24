@@ -7,13 +7,25 @@ app.controller('HeadsUpIdController', ['$scope', '$window', '$log', '$state', 'g
   $scope.notFound = false
 
   $scope.findPerson = function (withEmail) {
+    $scope.showNotFoundErrMessage = false;
+    $scope.showServerErrMessage = false;
     getPerson(withEmail).then(function (persons) {
       $log.log("Response from getPerson(): " + dump(persons, 'none'))
-      $scope.potentialPersons = persons
-      $scope.notFound = false
+      if (persons.length > 0) {
+        $scope.potentialPersons = persons
+        $scope.notFound = false
+      } else {
+        $log.log("Person not found")
+        $scope.notFound = true;
+        $scope.showNotFoundErrMessage = true;
+        var field = $window.document.getElementById('emailInput')
+        field.focus()
+        field.select()
+      }
     }, function notFound () {
-      $log.log("Person not found")
-      $scope.notFound = true
+      $scope.showServerErrMessage = true;
+      $log.log($scope.errorMessage);
+      $scope.notFound = true;
       var field = $window.document.getElementById('emailInput')
       field.focus()
       field.select()
