@@ -58,9 +58,8 @@ app.factory('getExistingDates', ['$log', '$q', '$http', function ($log, $q, $htt
     var defer = $q.defer()
 
     $http({
-      url: `https://api.airtable.com/v0/${getAirtableBase()}/Heads%20Up?api_key=${getAirtableAPIKey()}`,
+      url: `https://api.airtable.com/v0/${getAirtableBase()}/Heads%20Up?api_key=${getAirtableAPIKey()}&filterByFormula={Volunteer ID}='${personId}'`,
       method: "GET",
-      filterByFormula: `{Volunteer ID} = ${personId}`
     }).then(
       function (response) {
 

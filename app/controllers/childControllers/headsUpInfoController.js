@@ -56,7 +56,7 @@ app.controller('HeadsUpInfoController', ['$scope', '$log', '$q', '$state', '$sta
 
   var existingDates_defer = $q.defer();
   startEndDates_defer.promise.then(function () {
-    getExistingDates($scope.person["RecordID"]).then(function (existingDatesResponse) {
+    getExistingDates($scope.person["PersonID"]).then(function (existingDatesResponse) {
       var existingDatesObj = {};
       existingDatesResponse.forEach(function (date) {
         existingDatesObj[date["Date"]] = date;
